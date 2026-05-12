@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="邪恶农场：链上双阵营农场对抗与丰收分红协议" />
+    <title>邪恶农场：链上双阵营农场对抗与丰收分红协议</title>
+    <link rel="icon" type="image/webp" href="./logo.webp" />
+    <link rel="apple-touch-icon" href="./logo.webp" />
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="top-nav card">
+            <div class="brand">
+                <img src="./logo.webp" alt="邪恶农场LOGO" class="brand-logo" />
+            </div>
+            <div class="tabs">
+                <span id="tabMechanism" class="active tab-link">农场规则</span>
+                <span id="tabFaqs" class="tab-link">常见问题(FAQS)</span>
+                <span class="tab-link">开源验证</span>
+            </div>
+            <div class="top-wallet">
+                <div class="top-wallet-actions">
+                    <a href="https://x.com/" target="_blank" class="social-link" title="Twitter / X">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    </a>
+                    <a href="https://t.me/" target="_blank" class="social-link" title="Telegram">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0C5.344 0 0 5.344 0 11.944c0 6.6 5.344 11.944 11.944 11.944 6.6 0 11.944-5.344 11.944-11.944C23.888 5.344 18.544 0 11.944 0zM17.8 8.1l-2.02 9.54c-.15.68-.56.84-1.13.52l-3.08-2.27-1.48 1.43c-.16.16-.3.3-.61.3l.22-2.12 3.86-3.49c.17-.15-.04-.24-.26-.11l-4.77 3c-.46.29-.89.44-1.13.44l-2.12-.66c-.46-.14-.47-.46.1-.64l8.28-3.19c.38-.14.72.1.6.53z"/></svg>
+                    </a>
+                    <button id="btnConnect">连接钱包</button>
+                    <button id="btnSwitchChain" class="secondary" style="display: none;">切网</button>
+                </div>
+                <div class="top-wallet-meta wallet-meta-hide">
+                    <span id="connStatus">未连接</span>
+                    <span id="network">-</span>
+                </div>
+                <div class="top-wallet-meta wallet-meta-hide">
+                    <span id="contractAddr" title="点击复制合约地址">等待部署...</span>
+                </div>
+                <div id="walletGuide" class="hint wallet-meta-hide">-</div>
+            </div>
+        </div>
+
+        <div class="battle-phase card" id="battlePhaseBar">
+            <div class="phase-step" id="phaseStepPrep"><span class="phase-dot"></span><div><strong>备耕阶段</strong><small id="phasePrepTime">--:--</small></div></div>
+            <div class="phase-arrow">››</div>
+            <div class="phase-step" id="phaseStepBattle"><span class="phase-dot"></span><div><strong>抢收阶段</strong><small id="phaseBattleTime">--:--</small></div></div>
+            <div class="phase-arrow">››</div>
+            <div class="phase-step" id="phaseStepEnded"><span class="phase-dot"></span><div><strong>本季结算</strong><small id="phaseEndedText">等待结算</small></div></div>
+        </div>
+
+        <div class="battle-hero">
+            <div class="hero-bg-overlay"></div>
+            <!-- 火焰特效层 -->
+            <div class="hero-fire-fx">
+                <div class="ember"></div><div class="ember"></div><div class="ember"></div>
+                <div class="ember"></div><div class="ember"></div><div class="ember"></div>
+                <div class="ember"></div><div class="ember"></div><div class="ember"></div>
+            </div>
+            
+            <!-- 顶部状态栏 -->
+            <div class="hero-top-bar">
+                <div class="hero-round-tag">第 <span id="heroRound">--</span> 季争夺中</div>
+            </div>
+
+            <div class="hero-main-layout">
+                <!-- 左纵轴：红方 -->
+                <div class="hero-column side-red">
+                    <div class="side-info-group">
+                        <div class="side-name">红藤农庄</div>
+                        <div class="side-hp-value" id="heroRedHp">--</div>
+                        <div class="side-hp-meta">❤ 农场耐久 <span class="hp-pct">--%</span></div>
+                    </div>
+                    
+                    <div class="side-hp-bar-container">
+                        <div class="side-hp-fill" id="heroRedHpBar"></div>
+                    </div>
+
+                    <div class="side-stats-card">
+                        <div class="stat-line"><span>总捣蛋值</span> <strong id="heroRedAtk">--</strong></div>
+                    </div>
+                </div>
+
+                <!-- 中轴：VS 核心 -->
+                <div class="hero-column center-vs">
+                    <img src="./VS.webp" alt="VS" class="vs-image" />
+                    <div class="vs-timer-box">
+                        <div class="timer-label">抢收时间</div>
+                        <div class="timer-value" id="heroCountdown">--:--:--</div>
+                    </div>
+                    <div class="prize-display-card">
+                        <div class="prize-tag">本季丰收奖池</div>
+                        <div class="prize-main">
+                            <strong class="prize-amount" id="heroPrize">-- BNB</strong>
+                        </div>
+                        <div class="prize-divider"></div>
+                        <div class="prize-sub-info">
+                            仓库储备: <span id="heroTreasuryStock">-- BNB</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右纵轴：蓝方 -->
+                <div class="hero-column side-blue">
+                    <div class="side-info-group">
+                        <div class="side-name">青黏农庄</div>
+                        <div class="side-hp-value" id="heroBlueHp">--</div>
+                        <div class="side-hp-meta">农场耐久 ❤ <span class="hp-pct">--%</span></div>
+                    </div>
+
+                    <div class="side-hp-bar-container">
+                        <div class="side-hp-fill" id="heroBlueHpBar"></div>
+                    </div>
+
+                    <div class="side-stats-card">
+                        <div class="stat-line"><span>总捣蛋值</span> <strong id="heroBlueAtk">--</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="card c6 panel-battle">
+                <h3>当前农场局势</h3>
+                <div class="kv"><span>季次</span><span id="roundId">-</span></div>
+                <div class="kv"><span>阶段</span><span id="roundState">-</span></div>
+                <div class="kv"><span>阶段倒计时</span><span id="countdown">-</span></div>
+                <div class="kv"><span>丰收奖池 / 农场分红池</span><span id="pools">-</span></div>
+                <div class="kv"><span>红藤活力/捣蛋</span><span id="redStats">-</span></div>
+                <div class="kv"><span>青黏活力/捣蛋</span><span id="blueStats">-</span></div>
+            </div>
+
+            <div class="card c4 panel-stake">
+                <h3>签订农场契约</h3>
+                <div class="identity-row" id="identityCards">
+                    <div class="id-card active" data-identity="1">
+                        <img class="id-card-avatar" src="./捣蛋农夫.webp" alt="捣蛋农夫头像" />
+                        <div class="id-card-name">捣蛋农夫</div>
+                        <div class="id-card-meta">签约 500,000 枚</div>
+                        <div class="id-card-meta">活力 +5,000</div>
+                        <div class="id-card-meta">捣蛋 +10</div>
+                    </div>
+                    <div class="id-card" data-identity="2">
+                        <img class="id-card-avatar" src="./菜园管事.webp" alt="菜园管事头像" />
+                        <div class="id-card-name">菜园管事</div>
+                        <div class="id-card-meta">签约 1,000,000 枚</div>
+                        <div class="id-card-meta">活力 +10,000</div>
+                        <div class="id-card-meta">捣蛋 +18</div>
+                    </div>
+                    <div class="id-card" data-identity="4">
+                        <img class="id-card-avatar" src="./果棚监工.webp" alt="果棚监工头像" />
+                        <div class="id-card-name">果棚监工</div>
+                        <div class="id-card-meta">签约 5,000,000 枚</div>
+                        <div class="id-card-meta">活力 +50,000</div>
+                        <div class="id-card-meta">捣蛋 +70</div>
+                    </div>
+                    <div class="id-card" data-identity="5">
+                        <img class="id-card-avatar" src="./农场庄主.webp" alt="农场庄主头像" />
+                        <div class="id-card-name">农场庄主</div>
+                        <div class="id-card-meta">签约 10,000,000 枚</div>
+                        <div class="id-card-meta">活力 +100,000</div>
+                        <div class="id-card-meta">捣蛋 +120</div>
+                    </div>
+                </div>
+                <label class="muted">选择归属农庄（仅农场庄主可选）</label>
+                <select id="camp">
+                    <option value="0">0-自动补位</option>
+                    <option value="1">1-红藤农庄</option>
+                    <option value="2">2-青黏农庄</option>
+                </select>
+                <div id="campHint" class="hint">非农场庄主身份默认自动补位到弱势农庄</div>
+                <div class="grid1">
+                    <button id="btnStake">签订契约入场</button>
+                </div>
+                <div id="stakeBtnHint" class="hint">-</div>
+                <div class="kv"><span>本身份所需签约量</span><span id="needStake">-</span></div>
+                <div class="kv"><span>当前授权量</span><span id="allowanceNow">-</span></div>
+                <div class="kv"><span>签约状态</span><span id="allowanceState">-</span></div>
+            </div>
+
+            <div class="card c4 panel-my">
+                <h3>我的农庄身份</h3>
+                <div class="my-head">
+                    <div class="avatar"><img src="./logo.webp" alt="邪恶农场头像" /></div>
+                    <div>
+                        <div id="walletMini" class="wallet-mini">未连接</div>
+                        <div id="myRole" class="role-chip">-</div>
+                    </div>
+                </div>
+                <div class="kv"><span>签约量</span><span id="myStake">-</span></div>
+                <div class="kv"><span>丰收权重</span><span id="myWeight">-</span></div>
+                <div class="kv"><span>代币余额</span><span id="myTokenBalance">-</span></div>
+                <div class="kv"><span>撤出状态</span><span id="unstakeStatus">-</span></div>
+                <div class="kv"><span>签约剩余</span><span id="lockRemain">-</span></div>
+                <div class="kv"><span>待领取收成</span><span id="myPending">-</span></div>
+                <div id="rewardHint" class="hint">-</div>
+                <div class="grid2">
+                    <button id="btnUnstake" class="secondary">撤离农场</button>
+                    <button id="btnClaim" class="good">收割收益</button>
+                </div>
+                <div id="unstakeBtnHint" class="hint">-</div>
+            </div>
+
+            <div class="card c12 panel-feed">
+                <h3>农场动态 <span id="syncAt" class="sync-tip">未同步</span></h3>
+                <div id="eventFeed" class="event-feed"></div>
+                <details class="debug-log-wrap">
+                    <summary>查看调试日志</summary>
+                    <div id="log" class="log"></div>
+                </details>
+            </div>
+        </div>
+
+        <div class="tax-strip-wrap">
+            <div class="card panel-tax">
+                    <h3>农庄总览</h3>
+                    <div class="tax-grid">
+                    <div class="tax-item"><span class="muted">仓库地址余额</span><strong id="treasuryTotal">-</strong></div>
+                    <div class="tax-item"><span class="muted">分红池余额</span><strong id="dividendPool80">-</strong></div>
+                    <div class="tax-item"><span class="muted">合约地址余额</span><strong id="totalTax">-</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="mechanismModal" class="modal" aria-hidden="true">
+        <div class="modal-mask" data-close="1"></div>
+        <div class="modal-panel card" role="dialog" aria-modal="true" aria-labelledby="mechanismTitle">
+            <div class="modal-head">
+                <h3 id="mechanismTitle">农场规则</h3>
+                <button id="btnCloseMechanism" class="modal-close" aria-label="关闭规则">×</button>
+            </div>
+            <div class="modal-body">
+                <p><strong>一、 农庄收益规则</strong></p>
+                <p>每一笔代币交易都会为邪恶农场带来持续收益，形成本季丰收奖池的增长来源：<br>
+                   买入税：1% | 卖出税：5%</p>
+                <p>收益分配逻辑：<br>
+                   • 20% 进入【农场仓库】：用于社区活动、生态维护与农庄运营。<br>
+                   • 80% 进入【农场分红池】：全额用于两大农庄对抗玩法，奖励获胜一方。</p>
+                
+                <p><strong>二、 身份签约与捣蛋能力</strong></p>
+                <p>玩家通过在官网签约加入农庄获得身份，不同签约等级决定其在农庄中的地块活力、捣蛋值与丰收权重：</p>
+                <div class="table-wrap">
+                    <table class="mechanism-table">
+                        <thead>
+                            <tr>
+                                <th>农庄身份</th>
+                                <th>签约门槛</th>
+                                <th>地块活力(HP)</th>
+                                <th>基础捣蛋值(AP)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>捣蛋农夫</td><td>50 万枚</td><td>+5,000 点</td><td>10 点</td></tr>
+                            <tr><td>菜园管事</td><td>100 万枚</td><td>+10,000 点</td><td>18 点</td></tr>
+                            <tr><td>果棚监工</td><td>500 万枚</td><td>+50,000 点</td><td>70 点</td></tr>
+                            <tr><td>农场庄主</td><td>1000 万枚</td><td>+100,000 点</td><td>120 点</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p><strong>三、 双农庄对抗机制</strong></p>
+                <p>1. 双庄对抗：红藤农庄与青黏农庄会持续争夺地块和收成。农场庄主可自由选择归属农庄，其余身份自动补位到弱势农庄。<br>
+                   2. 日常抢收：合约每 10 秒自动结算一次抢收进度，对敌方地块活力造成消耗。<br>
+                   3.</p><p>3. 捣蛋爆发：持仓期间单笔 >10U 的买单会触发额外破坏，倍率随身份等级递增：</p>
+                <div class="table-wrap">
+                    <table class="mechanism-table">
+                        <thead>
+                            <tr>
+                                <th>买入金额</th>
+                                <th>捣蛋农夫</th>
+                                <th>菜园管事</th>
+                                <th>果棚监工</th>
+                                <th>农场庄主</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>≥ 500 USD</td><td>1000</td><td>1200</td><td>4000</td><td>7000</td></tr>
+                            <tr><td>≥ 200 USD</td><td>400</td><td>600</td><td>2000</td><td>3400</td></tr>
+                            <tr><td>≥ 100 USD</td><td>200</td><td>300</td><td>1000</td><td>1700</td></tr>
+                            <tr><td>≥ 50 USD</td><td>100</td><td>150</td><td>500</td><td>850</td></tr>
+                            <tr><td>≥ 10 USD</td><td>20</td><td>30</td><td>100</td><td>150</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p><strong>四、 丰收分配规则</strong></p>
+                <p>当一方地块活力归零，本季对抗结束，胜方成员按权重参与领取收成：<br>
+                   1. 本季丰收奖池：每季从农场分红池提取 50% (上限 1 BNB) 形成实时奖池。<br>
+                   2. 个人权重 = 签约数量 × 时间倍率，备耕阶段入场可获得更高权重。<br>
+                   3. 结算方式：胜方成员可在官网实时领取属于自己的 BNB 收成。</p>
+
+                <p><strong>五、 农庄玩法亮点</strong></p>
+                <p>• 轻松锁仓：签约机制锁定流通筹码，降低抛压。<br>
+                   • 买盘驱动：将“买入行为”转化为“捣蛋爆发”，提升互动与交易意愿。<br>
+                   • 分红闭环：收益流入农场分红池，吸引更多农庄成员参与。</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="faqsModal" class="modal" aria-hidden="true">
+        <div class="modal-mask" data-close="1"></div>
+        <div class="modal-panel card" role="dialog" aria-modal="true" aria-labelledby="faqsTitle">
+            <div class="modal-head">
+                <h3 id="faqsTitle">常见问题 (FOAS)</h3>
+                <button id="btnCloseFaqs" class="modal-close" aria-label="关闭问题">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="faq-item">
+                    <button class="faq-question">什么是邪恶农场？</button>
+                    <div class="faq-answer">
+                        <p>邪恶农场是一个链上双阵营对抗与丰收分红协议。玩家可以通过签订契约加入红藤农庄或青黏农庄，在每个收割季中比拼捣蛋值和活力，获胜方将瓜分丰厚的丰收奖池。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">如何参与游戏并获得收益？</button>
+                    <div class="faq-answer">
+                        <p>1. 连接您的 Web3 钱包（需在 BSC 主网）。</p>
+                        <p>2. 在“签订农场契约”面板选择一个身份并签约入场。</p>
+                        <p>3. 等待本季结算。如果您的农庄获胜，即可在“我的农庄身份”面板点击【收割收益】领取您的 BNB 奖励。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">“捣蛋爆发”是什么？如何触发？</button>
+                    <div class="faq-answer">
+                        <p>捣蛋爆发是一种强大的主动攻击方式。当您在入场状态下，单笔买入项目代币超过 10 USD 时，合约将自动触发捣蛋爆发，对敌方农庄造成大量活力消耗。身份越高，造成的破坏倍率越大。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">我可以随时撤出农场（赎回）吗？</button>
+                    <div class="faq-answer">
+                        <p>为了保证对抗的公平性，每次签订契约后会有一定的锁定期。锁定时间结束后，您可以随时点击【撤离农场】赎回您的全额质押代币。但请注意，撤离后您将无法参与当前赛季的收益结算。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">丰收奖池的资金从哪里来？</button>
+                    <div class="faq-answer">
+                        <p>资金来源于代币交易的税收。所有买卖交易产生的税费，其中 80% 会直接进入【农场分红池】。每个赛季结算时，会从分红池中提取 50% 作为本季的【丰收奖池】发放给胜方玩家。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="txOverlay" class="tx-overlay" aria-hidden="true">
+        <div class="tx-overlay-mask" onclick="setUiBusy(false)"></div>
+        <div class="tx-overlay-card card">
+            <div class="tx-spinner"></div>
+            <div id="txOverlayTitle" class="tx-overlay-title">等待钱包确认</div>
+            <div id="txOverlayText" class="tx-overlay-text">请在钱包中完成签名或确认交易</div>
+            <button class="secondary" style="margin-top: 20px; width: auto; padding: 8px 20px;" onclick="setUiBusy(false)">取消</button>
+        </div>
+    </div>
+    <div id="txToast" class="tx-toast" aria-hidden="true"></div>
+
+    <div id="mobileGuideModal" class="modal" aria-hidden="true">
+        <div class="modal-mask" onclick="closeMobileGuide()"></div>
+        <div class="modal-panel card" style="max-width: 340px; margin: 20vh auto;">
+            <div class="modal-head">
+                <h3>选择钱包进入农场</h3>
+                <button onclick="closeMobileGuide()" class="modal-close">×</button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 20px 0;">
+                <p class="muted" style="margin-bottom: 20px;">检测到您未在钱包浏览器中打开</p>
+                <div style="display: grid; gap: 12px;">
+                    <a id="linkTP" class="button good" style="text-decoration:none; display:block;">TokenPocket 跳转</a>
+                    <a id="linkMM" class="button primary" style="text-decoration:none; display:block; background:#f6851b; color:white;">MetaMask 跳转</a>
+                    <a id="linkOKX" class="button secondary" style="text-decoration:none; display:block; background:#000; color:white;">OKX Wallet 跳转</a>
+                </div>
+                <p class="hint" style="margin-top: 15px;">点击上方按钮将自动唤起钱包并进入农场</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+</body>
+
+</html>
